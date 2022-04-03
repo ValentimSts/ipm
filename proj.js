@@ -32,6 +32,9 @@ let trials = []; // contains the order of targets that activate in the test
 let current_trial = 0; // the current trial number (indexes into trials array above)
 let attempt = 0; // users complete each test twice to account for practice (attemps 0 and 1)
 let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there is a miss)
+
+
+// Sidebar parameters (new feature)
 let bartime = 0;
 let timePerTarget = 1;
 let decreasePerFrame = 50 / (6 * timePerTarget);
@@ -60,36 +63,35 @@ function setup() {
 
   textFont("Arial", 18); // font size for the majority of the text
 
+  // TODO: uncomment this line
+  //drawUserIDScreen(); // draws the user start-up screen (student ID and display size)
+
+  // quality of life  feature (display settings hardcoded) remove when finished
   display_size = 15;
   start_button = createButton("START");
   start_button.mouseReleased(startTest);
-  //drawUserIDScreen();        // draws the user start-up screen (student ID and display size)
 }
 
 
 // Runs every frame and redraws the screen
 function draw() {
-  // 60 fps
+  // decreases the sidebar (redrawing it every fram) -> 60 fps
   if (bartime + decreasePerFrame <= 500 && !firstTurn) {
     bartime += decreasePerFrame;
   }
 
   if (draw_targets) {
     // The user is interacting with the 6x3 target grid
-
     background(color(0, 0, 0)); // sets background to black
 
     // Print trial count at the top left-corner of the canvas
-
     fill(color(255, 255, 255));
-
     textAlign(LEFT);
-
     text("Trial " + (current_trial + 1) + " of " + trials.length, 50, 20);
 
+    // colors the sidebar accordingly
     fill(color(0, 0, 0));
     rect(110, 190, 40, 500, 20);
-
     fill(color(0, 255, 0));
     rect(110, 190, 40, 500 - bartime, 20);
 
@@ -98,9 +100,11 @@ function draw() {
         drawTarget(i);
     }
 
+    // finds the current and next targets
     let target = getTargetBounds(trials[current_trial]);
     let nextTarget = getTargetBounds(trials[current_trial + 1]);
 
+    // creates a line from the current target to the next one
     stroke(color(150, 150, 150));
     line(target.x, target.y, nextTarget.x, nextTarget.y);
 
@@ -111,10 +115,11 @@ function draw() {
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
+    // cursor color
     fill(color(0, 255, 0));
     stroke(color(0, 0, 255));
 
-    //cor do rato acima, 0.8 e o tamanho
+    // size of the virtual cursor
     circle(x, y, 0.65 * PPCM);
   }
 }
@@ -123,24 +128,16 @@ function draw() {
 // Print and save results at the end of 54 trials
 function printAndSavePerformance() {
   // DO NOT CHANGE THESE!
-
   let accuracy = parseFloat(hits * 100) / parseFloat(hits + misses);
-
   let test_time = (testEndTime - testStartTime) / 1000;
-
   let time_per_target = nf(test_time / parseFloat(hits + misses), 0, 3);
-
   let penalty = constrain((parseFloat(95) - parseFloat(hits * 100) / parseFloat(hits + misses)) * 0.2, 0, 100);
-
   let target_w_penalty = nf(test_time / parseFloat(hits + misses) + penalty, 0, 3);
-
   let timestamp = day() + "/" + month() + "/" + year() + "  " + hour() + ":" + minute() + ":" + second();
 
-
+  
   background(color(0, 0, 0)); // clears screen
-
   fill(color(255, 255, 255)); // set text fill color to white
-
   text(timestamp, 10, 20); // display time on screen (top-left corner)
 
   textAlign(CENTER);
@@ -164,28 +161,17 @@ function printAndSavePerformance() {
   //
 
   // Saves results (DO NOT CHANGE!)
-
   let attempt_data = {
     project_from: GROUP_NUMBER,
-
     assessed_by: student_ID,
-
     test_completed_by: timestamp,
-
     attempt: attempt,
-
     hits: hits,
-
     misses: misses,
-
     accuracy: accuracy,
-
     attempt_duration: test_time,
-
     time_per_target: time_per_target,
-
     target_w_penalty: target_w_penalty,
-
     fitts_IDs: fitts_IDs,
   };
 
@@ -226,6 +212,8 @@ function mousePressed() {
 
       if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
         hits++;
+
+        // when the user hits the target, the sidebar resets
         bartime = 0;
         firstTurn = false;
       } 
@@ -268,23 +256,18 @@ function drawTarget(i) {
 
   if (trials[current_trial] === i) {
     // Highlights the target the user should be trying to select
-
-    // with a white border
-    fill(color(150, 0, 155));
-    stroke(color(0, 255, 200)); //cor do outline do alvo
-
-    strokeWeight(4); //width do outline
+    fill(color(150, 0, 155)); // target's color
+    stroke(color(0, 255, 200)); // color of the target's outline
+    strokeWeight(4); // width of the outline
 
     // Remember you are allowed to access targets (i-1) and (i+1)
     // if this is the target the user should be trying to select
-
-    //
   }
   // Does not draw a border if this is not the target the user
-
   // should be trying to select
   else {
     noStroke();
+    // every other target is colored differently
     fill(color(30, 30, 30));
   }
 
