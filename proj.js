@@ -30,6 +30,9 @@ let database; // Firebase DB
 let draw_targets = false; // used to control what to show in draw()
 let trials = []; // contains the order of targets that activate in the test
 let current_trial = 0; // the current trial number (indexes into trials array above)
+
+// let next_trial = current_trial + 1;
+
 let attempt = 0; // users complete each test twice to account for practice (attemps 0 and 1)
 let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there is a miss)
 
@@ -92,6 +95,7 @@ function draw() {
     // colors the sidebar accordingly
     fill(color(0, 0, 0));
     rect(110, 190, 40, 500, 20);
+
     fill(color(0, 255, 0));
     rect(110, 190, 40, 500 - bartime, 20);
 
@@ -115,6 +119,14 @@ function draw() {
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
+    if (dist(target.x, target.y, x, y) < target.w / 2) {
+      fill(color(150, 0, 155)); // target's color
+      stroke(color(255, 255, 255)); // color of the target's outline
+      strokeWeight(8);
+  
+      circle(target.x, target.y, target.w);
+    }
+    
     // cursor color
     fill(color(0, 255, 0));
     stroke(color(0, 0, 255));
@@ -210,8 +222,14 @@ function mousePressed() {
       let virtual_x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
       let virtual_y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
+      circle(target.x, target.y, target.w);
+
       if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
         hits++;
+        
+        stroke(color(200, 7, 7));
+
+        circle(target.x, target.y, target.w);
 
         // when the user hits the target, the sidebar resets
         bartime = 0;
@@ -251,29 +269,40 @@ function drawTarget(i) {
   // Get the location and size for target (i)
 
   let target = getTargetBounds(i);
+  let nextTarget = getTargetBounds(trials[current_trial+1]);
+
 
   // Check whether this target is the target the user should be trying to select
 
   if (trials[current_trial] === i) {
+
+    // creates a highlight on the next target
+    fill(color(30, 30, 30));
+    stroke(color(255, 255, 255)); // color of the target's outline
+    strokeWeight(5); // width of the outline
+
+    drawingContext.setLineDash([10, 10]);
+    circle(nextTarget.x, nextTarget.y, nextTarget.w);
+    drawingContext.setLineDash([0, 0]);
+
     // Highlights the target the user should be trying to select
     fill(color(150, 0, 155)); // target's color
     stroke(color(0, 255, 200)); // color of the target's outline
     strokeWeight(4); // width of the outline
 
-    // Remember you are allowed to access targets (i-1) and (i+1)
-    // if this is the target the user should be trying to select
+    // Draws the targets
+    circle(target.x, target.y, target.w);
   }
+
   // Does not draw a border if this is not the target the user
   // should be trying to select
   else {
     noStroke();
     // every other target is colored differently
     fill(color(30, 30, 30));
+    // Draws the targets
+    circle(target.x, target.y, target.w);
   }
-
-  // Draws the target
-  // cor dos circulos, manter baixo p contraste com o rato e outline
-  circle(target.x, target.y, target.w);
 }
 
 
