@@ -41,24 +41,36 @@ let decreasePerFrame = 50 / (6 * timePerTarget);
 let firstTurn = true;
 
 
-// // Color variables
+// Color variables
 
-// // main target colors (target to hit)
-// let mainTarget_color = color(230, 57, 70);
-// let mainTarget_highlight = color(241, 250, 238);
+// color of the background
+let background_color = [46, 196, 182];
 
-// // colors of the next target to hit
-// let nextTarget_color = color(234, 84, 96);
-// let nextTarget_highlight = color(241, 250, 238);
+// main target colors (target to hit)
+let mainTarget_color = [215, 31, 46];
+let mainTarget_outline = [241, 250, 238];
+let mainTarget_hover = [215, 31, 46];
 
-// // colors of the remaining targets
-// let target_color = color(168, 218, 220);
+// colors of the next target to hit
+let nextTarget_color = [234, 84, 96];
+let nextTarget_outline = [241, 250, 238];
 
-// // color of the background
-// let background_color = color(69, 123, 157);
+// color of the line to the next target
+let lineToTarget_color = [241, 250, 238];
 
-// // color of the line to the next target
-// let lineToTarget_color = color(241, 250, 238);
+// colors of the remaining targets
+let genericTarget_color = [30, 30, 30];
+
+// colors of the cursor
+let cursor_color = [255, 159, 28];
+let cursor_outline = [188, 108, 37];
+
+// sidebar colors
+let sidebar_background = [30, 30, 30];
+let sidebar_bar = [188, 108, 37];
+
+let hit_color = [153, 183, 24];
+let miss_color = [213, 10, 27];
 
 
 
@@ -101,7 +113,7 @@ function setup() {
 
 // creates a line from the current target to the next one
 function draw_line(curr, next) {
-  stroke(color(241, 250, 238));
+  stroke(lineToTarget_color);
   strokeWeight(4);
   line(curr.x, curr.y, next.x, next.y);
 }
@@ -112,12 +124,60 @@ function hovering_target(target, x, y) {
 
   if (dist(target.x, target.y, x, y) < target.w / 2) {
 
-    fill(color(215, 31, 46)); // target's color while hovered
-    stroke(color(241, 250, 238)); // target's outline
+    fill(mainTarget_hover); // target's color while hovered
+    stroke(mainTarget_outline); // target's outline
     strokeWeight(8);
 
     circle(target.x, target.y, target.w);
   }
+}
+
+
+// draws the main target (the one the user should hit)
+function draw_mainTarget(target) {
+  // Highlights the target the user should be trying to select
+  fill(mainTarget_color); // target's color
+  stroke(mainTarget_outline); // color of the target's outline
+  strokeWeight(4); // width of the outline
+
+  // Draws the targets
+  circle(target.x, target.y, target.w);
+}
+
+
+// draws a dashed line on the next target to hit
+function draw_nexTarget(target, nextTarget) {
+
+  // creates a highlight on the next target
+  stroke(nextTarget_outline); // color of the target's outline
+  strokeWeight(4); // width of the outline
+
+  // if the next target is the same we're currently on
+  if (target.isEqual(nextTarget)) {
+    fill(color(background_color));
+    
+    drawingContext.setLineDash([15, 15]);
+    circle(nextTarget.x, nextTarget.y, nextTarget.w + 30);
+    drawingContext.setLineDash([0, 0]);
+  }
+  else {
+    fill(genericTarget_color);
+
+    drawingContext.setLineDash([15, 15]);
+    circle(nextTarget.x, nextTarget.y, nextTarget.w);
+    drawingContext.setLineDash([0, 0]);
+  }
+}
+
+
+function hit_animation(target) {
+  fill(hit_color);
+
+}
+
+
+function miss_animation(target) {
+
 }
 
 
@@ -130,7 +190,7 @@ function draw() {
 
   if (draw_targets) {
     // The user is interacting with the 6x3 target grid
-    background(color(46, 88, 114));
+    background(background_color);
 
     // Print trial count at the top left-corner of the canvas
     fill(color(255, 255, 255));
@@ -138,11 +198,11 @@ function draw() {
     text("Trial " + (current_trial + 1) + " of " + trials.length, 50, 20);
 
     // sidebar background color
-    fill(color(30, 30, 30));
+    fill(sidebar_background);
     rect(110, 190, 40, 500, 20);
 
     // sidebar "sliding bar" color
-    fill(color(153, 202, 60));
+    fill(sidebar_bar);
     rect(110, 190, 40, 500 - bartime, 20);
 
     // Draw all 18 targets
@@ -163,8 +223,8 @@ function draw() {
     hovering_target(target, x, y);
 
     // cursor color
-    fill(color(255, 159, 28));
-    stroke(color(188, 108, 37));
+    fill(cursor_color);
+    stroke(cursor_outline);
 
     // size of the virtual cursor
     circle(x, y, 0.65 * PPCM);
@@ -310,35 +370,9 @@ function drawTarget(i) {
     // draws a lin to the next target
     draw_line(target, nextTarget);
     
-    // creates a highlight on the next target
-    stroke(color(241, 250, 238)); // color of the target's outline
-    strokeWeight(4); // width of the outline
+    draw_nexTarget(target, nextTarget);
 
-    // if the next target is the same we're currently on
-    if (target.isEqual(nextTarget)) {
-      fill(color(46, 88, 114));
-      
-      drawingContext.setLineDash([15, 15]);
-      circle(nextTarget.x, nextTarget.y, nextTarget.w + 30);
-      drawingContext.setLineDash([0, 0]);
-    }
-    else {
-      fill(color(30, 30, 30));
-
-      drawingContext.setLineDash([15, 15]);
-      circle(nextTarget.x, nextTarget.y, nextTarget.w);
-      drawingContext.setLineDash([0, 0]);
-    }
-
-    
-
-    // Highlights the target the user should be trying to select
-    fill(color(215, 31, 46)); // target's color
-    stroke(color(241, 250, 238)); // color of the target's outline
-    strokeWeight(4); // width of the outline
-
-    // Draws the targets
-    circle(target.x, target.y, target.w);
+    draw_mainTarget(target);
   }
 
   // Does not draw a border if this is not the target the user
@@ -346,7 +380,7 @@ function drawTarget(i) {
   else {
     noStroke();
     // every other target is colored differently
-    fill(color(30, 30, 30));
+    fill(genericTarget_color);
     // Draws the targets
     circle(target.x, target.y, target.w);
   }
@@ -423,10 +457,7 @@ function windowResized() {
 // Responsible for drawing the input area
 function drawInputArea() {
   fill(color(20, 100, 20));
-
   stroke(color(0, 220, 220));
-
   strokeWeight(2);
-
   rect(inputArea.x, inputArea.y, inputArea.w * 0.95, inputArea.h * 0.95, 20);
 }
