@@ -30,9 +30,6 @@ let database; // Firebase DB
 let draw_targets = false; // used to control what to show in draw()
 let trials = []; // contains the order of targets that activate in the test
 let current_trial = 0; // the current trial number (indexes into trials array above)
-
-// let next_trial = current_trial + 1;
-
 let attempt = 0; // users complete each test twice to account for practice (attemps 0 and 1)
 let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there is a miss)
 
@@ -44,16 +41,42 @@ let decreasePerFrame = 50 / (6 * timePerTarget);
 let firstTurn = true;
 
 
+// // Color variables
+
+// // main target colors (target to hit)
+// let mainTarget_color = color(230, 57, 70);
+// let mainTarget_highlight = color(241, 250, 238);
+
+// // colors of the next target to hit
+// let nextTarget_color = color(234, 84, 96);
+// let nextTarget_highlight = color(241, 250, 238);
+
+// // colors of the remaining targets
+// let target_color = color(168, 218, 220);
+
+// // color of the background
+// let background_color = color(69, 123, 157);
+
+// // color of the line to the next target
+// let lineToTarget_color = color(241, 250, 238);
+
+
+
 // Target class (position and width)
 class Target {
   constructor(x, y, w) {
     this.x = x;
-
     this.y = y;
-
     this.w = w;
   }
+
+  isEqual(other) {
+    return this.x === other.x &&
+           this.y === other.y &&
+           this.w === other.w;
+  }
 }
+
 
 
 // Runs once at the start
@@ -76,6 +99,28 @@ function setup() {
 }
 
 
+// creates a line from the current target to the next one
+function draw_line(curr, next) {
+  stroke(color(241, 250, 238));
+  strokeWeight(4);
+  line(curr.x, curr.y, next.x, next.y);
+}
+
+
+// colors the target when the user hovers over it
+function hovering_target(target, x, y) {
+
+  if (dist(target.x, target.y, x, y) < target.w / 2) {
+
+    fill(color(215, 31, 46)); // target's color while hovered
+    stroke(color(241, 250, 238)); // target's outline
+    strokeWeight(8);
+
+    circle(target.x, target.y, target.w);
+  }
+}
+
+
 // Runs every frame and redraws the screen
 function draw() {
   // decreases the sidebar (redrawing it every fram) -> 60 fps
@@ -85,18 +130,19 @@ function draw() {
 
   if (draw_targets) {
     // The user is interacting with the 6x3 target grid
-    background(color(0, 0, 0)); // sets background to black
+    background(color(46, 88, 114));
 
     // Print trial count at the top left-corner of the canvas
     fill(color(255, 255, 255));
     textAlign(LEFT);
     text("Trial " + (current_trial + 1) + " of " + trials.length, 50, 20);
 
-    // colors the sidebar accordingly
-    fill(color(0, 0, 0));
+    // sidebar background color
+    fill(color(30, 30, 30));
     rect(110, 190, 40, 500, 20);
 
-    fill(color(0, 255, 0));
+    // sidebar "sliding bar" color
+    fill(color(153, 202, 60));
     rect(110, 190, 40, 500 - bartime, 20);
 
     // Draw all 18 targets
@@ -106,30 +152,19 @@ function draw() {
 
     // finds the current and next targets
     let target = getTargetBounds(trials[current_trial]);
-    let nextTarget = getTargetBounds(trials[current_trial + 1]);
-
-    // creates a line from the current target to the next one
-    stroke(color(150, 150, 150));
-    line(target.x, target.y, nextTarget.x, nextTarget.y);
 
     // Draw the user input area
     drawInputArea();
 
-    // Draw the virtual cursor
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
-
-    if (dist(target.x, target.y, x, y) < target.w / 2) {
-      fill(color(150, 0, 155)); // target's color
-      stroke(color(255, 255, 255)); // color of the target's outline
-      strokeWeight(8);
-  
-      circle(target.x, target.y, target.w);
-    }
     
+    // highlights the target when hovered
+    hovering_target(target, x, y);
+
     // cursor color
-    fill(color(0, 255, 0));
-    stroke(color(0, 0, 255));
+    fill(color(255, 159, 28));
+    stroke(color(188, 108, 37));
 
     // size of the virtual cursor
     circle(x, y, 0.65 * PPCM);
@@ -169,8 +204,6 @@ function printAndSavePerformance() {
   text("Average time for each target (+ penalty): " + target_w_penalty + "s", width / 2, 220);
 
   // Print Fitts IDS (one per target, -1 if failed selection, optional)
-
-  //
 
   // Saves results (DO NOT CHANGE!)
   let attempt_data = {
@@ -271,23 +304,37 @@ function drawTarget(i) {
   let target = getTargetBounds(i);
   let nextTarget = getTargetBounds(trials[current_trial+1]);
 
-
   // Check whether this target is the target the user should be trying to select
-
   if (trials[current_trial] === i) {
 
+    // draws a lin to the next target
+    draw_line(target, nextTarget);
+    
     // creates a highlight on the next target
-    fill(color(30, 30, 30));
-    stroke(color(255, 255, 255)); // color of the target's outline
-    strokeWeight(5); // width of the outline
+    stroke(color(241, 250, 238)); // color of the target's outline
+    strokeWeight(4); // width of the outline
 
-    drawingContext.setLineDash([10, 10]);
-    circle(nextTarget.x, nextTarget.y, nextTarget.w);
-    drawingContext.setLineDash([0, 0]);
+    // if the next target is the same we're currently on
+    if (target.isEqual(nextTarget)) {
+      fill(color(46, 88, 114));
+      
+      drawingContext.setLineDash([15, 15]);
+      circle(nextTarget.x, nextTarget.y, nextTarget.w + 30);
+      drawingContext.setLineDash([0, 0]);
+    }
+    else {
+      fill(color(30, 30, 30));
+
+      drawingContext.setLineDash([15, 15]);
+      circle(nextTarget.x, nextTarget.y, nextTarget.w);
+      drawingContext.setLineDash([0, 0]);
+    }
+
+    
 
     // Highlights the target the user should be trying to select
-    fill(color(150, 0, 155)); // target's color
-    stroke(color(0, 255, 200)); // color of the target's outline
+    fill(color(215, 31, 46)); // target's color
+    stroke(color(241, 250, 238)); // color of the target's outline
     strokeWeight(4); // width of the outline
 
     // Draws the targets
@@ -328,6 +375,9 @@ function continueTest() {
   hits = 0;
   misses = 0;
   fitts_IDs = [];
+
+  bartime = 0;
+  firstTurn = true;
 
   continue_button.remove();
 
