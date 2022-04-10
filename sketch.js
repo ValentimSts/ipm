@@ -54,12 +54,13 @@ let mainTarget_hover = [215, 31, 46];
 // colors of the next target to hit
 let nextTarget_color = [234, 84, 96];
 let nextTarget_outline = [241, 250, 238];
+let nextTarget_background = [221, 161, 94];
 
 // color of the line to the next target
 let lineToTarget_color = [241, 250, 238];
 
 // colors of the remaining targets
-let genericTarget_color = [30, 30, 30];
+let genericTarget_color = [52, 52, 52];
 
 // colors of the cursor
 let cursor_color = [255, 159, 28];
@@ -129,6 +130,7 @@ function hovering_target(target, x, y) {
     strokeWeight(8);
 
     circle(target.x, target.y, target.w);
+    strokeWeight(0);
   }
 }
 
@@ -161,7 +163,7 @@ function draw_nexTarget(target, nextTarget) {
     drawingContext.setLineDash([0, 0]);
   }
   else {
-    fill(genericTarget_color);
+    fill(nextTarget_background);
 
     drawingContext.setLineDash([15, 15]);
     circle(nextTarget.x, nextTarget.y, nextTarget.w);
@@ -170,14 +172,15 @@ function draw_nexTarget(target, nextTarget) {
 }
 
 
-function hit_animation(target) {
+function hit_animation(x, y) {
   fill(hit_color);
-
+  text("Hit", x, y);
 }
 
 
 function miss_animation(target) {
-
+  fill(miss_color);
+  text("Miss", x, y);
 }
 
 
@@ -248,19 +251,12 @@ function printAndSavePerformance() {
   text(timestamp, 10, 20); // display time on screen (top-left corner)
 
   textAlign(CENTER);
-
   text("Attempt " + (attempt + 1) + " out of 2 completed!", width / 2, 60);
-
   text("Hits: " + hits, width / 2, 100);
-
   text("Misses: " + misses, width / 2, 120);
-
   text("Accuracy: " + accuracy + "%", width / 2, 140);
-
   text("Total time taken: " + test_time + "s", width / 2, 160);
-
   text("Average time per target: " + time_per_target + "s", width / 2, 180);
-
   text("Average time for each target (+ penalty): " + target_w_penalty + "s", width / 2, 220);
 
   // Print Fitts IDS (one per target, -1 if failed selection, optional)
@@ -305,7 +301,6 @@ function mousePressed() {
 
   if (draw_targets) {
     // Get the location and size of the target the user should be trying to select
-
     let target = getTargetBounds(trials[current_trial]);
 
     // Check to see if the virtual cursor is inside the target bounds,
@@ -319,11 +314,6 @@ function mousePressed() {
 
       if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
         hits++;
-        
-        stroke(color(200, 7, 7));
-
-        circle(target.x, target.y, target.w);
-
         // when the user hits the target, the sidebar resets
         bartime = 0;
         firstTurn = false;
@@ -364,25 +354,23 @@ function drawTarget(i) {
   let target = getTargetBounds(i);
   let nextTarget = getTargetBounds(trials[current_trial+1]);
 
+  // Does not draw a border if this is not the target the user should be trying to select
+  noStroke();
+  fill(genericTarget_color);
+  // Draws the targets
+  circle(target.x, target.y, target.w);
+
   // Check whether this target is the target the user should be trying to select
   if (trials[current_trial] === i) {
-
-    // draws a lin to the next target
+    // draws a line from the current target to the next one
     draw_line(target, nextTarget);
-    
+
+    // draws the next target to hit
     draw_nexTarget(target, nextTarget);
-
+    
+    // draws the current target
     draw_mainTarget(target);
-  }
 
-  // Does not draw a border if this is not the target the user
-  // should be trying to select
-  else {
-    noStroke();
-    // every other target is colored differently
-    fill(genericTarget_color);
-    // Draws the targets
-    circle(target.x, target.y, target.w);
   }
 }
 
