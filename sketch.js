@@ -44,7 +44,7 @@ let firstTurn = true;
 // Color variables
 
 // color of the background
-let background_color = [46, 196, 182];
+let background_color = [33, 158, 188];
 
 // main target colors (target to hit)
 let mainTarget_color = [215, 31, 46];
@@ -64,7 +64,7 @@ let genericTarget_color = [52, 52, 52];
 
 // colors of the cursor
 let cursor_color = [255, 159, 28];
-let cursor_outline = [188, 108, 37];
+let cursor_outline = [0, 0, 0];
 
 // sidebar colors
 let sidebar_background = [30, 30, 30];
@@ -130,7 +130,6 @@ function hovering_target(target, x, y) {
     strokeWeight(8);
 
     circle(target.x, target.y, target.w);
-    strokeWeight(0);
   }
 }
 
@@ -172,12 +171,39 @@ function draw_nexTarget(target, nextTarget) {
 }
 
 
+// draws the sidebar 
+function draw_sidebar() {
+  strokeWeight(4);
+
+  // sidebar background color
+  fill(sidebar_background);
+  rect(110, 190, 40, 500, 20);
+
+  // sidebar "sliding bar" color
+  fill(sidebar_bar);
+  rect(110, 190, 40, 500 - bartime, 20);
+}
+
+
+// draws the trial count text on the top left
+function draw_trialCount() {
+  strokeWeight(0);
+
+  // Print trial count at the top left-corner of the canvas
+  fill(color(255, 255, 255));
+  textAlign(LEFT);
+  text("Trial " + (current_trial + 1) + " of " + trials.length, 50, 20);
+}
+
+
+// draws the hit animations
 function hit_animation(x, y) {
   fill(hit_color);
   text("Hit", x, y);
 }
 
 
+// draws the miss animations
 function miss_animation(target) {
   fill(miss_color);
   text("Miss", x, y);
@@ -195,18 +221,9 @@ function draw() {
     // The user is interacting with the 6x3 target grid
     background(background_color);
 
-    // Print trial count at the top left-corner of the canvas
-    fill(color(255, 255, 255));
-    textAlign(LEFT);
-    text("Trial " + (current_trial + 1) + " of " + trials.length, 50, 20);
+    draw_trialCount();
 
-    // sidebar background color
-    fill(sidebar_background);
-    rect(110, 190, 40, 500, 20);
-
-    // sidebar "sliding bar" color
-    fill(sidebar_bar);
-    rect(110, 190, 40, 500 - bartime, 20);
+    draw_sidebar();
 
     // Draw all 18 targets
     for (var i = 0; i < 18; i++) {
@@ -215,6 +232,10 @@ function draw() {
 
     // finds the current and next targets
     let target = getTargetBounds(trials[current_trial]);
+    let nextTarget = getTargetBounds(trials[current_trial+1]);
+
+    // draws a line from the current target to the next one
+    draw_line(target, nextTarget);
 
     // Draw the user input area
     drawInputArea();
@@ -224,6 +245,8 @@ function draw() {
     
     // highlights the target when hovered
     hovering_target(target, x, y);
+
+    strokeWeight(4);
 
     // cursor color
     fill(cursor_color);
@@ -331,6 +354,7 @@ function mousePressed() {
 
       draw_targets = false; // Stop showing targets and the user performance results
 
+      strokeWeight(0);
       printAndSavePerformance(); // Print the user's results on-screen and send these to the DB
 
       attempt++;
@@ -358,19 +382,17 @@ function drawTarget(i) {
   noStroke();
   fill(genericTarget_color);
   // Draws the targets
-  circle(target.x, target.y, target.w);
+  if (trials[current_trial+1] !== i) {
+    circle(target.x, target.y, target.w);
+  }
 
   // Check whether this target is the target the user should be trying to select
   if (trials[current_trial] === i) {
-    // draws a line from the current target to the next one
-    draw_line(target, nextTarget);
-
     // draws the next target to hit
     draw_nexTarget(target, nextTarget);
     
     // draws the current target
     draw_mainTarget(target);
-
   }
 }
 
