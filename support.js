@@ -64,27 +64,25 @@ function validSize() {
 
 // Starts the test (i.e., target selection task)
 function startTest() {
-
-    // TODO: uncomment this part
     
-    // if (validID() && validSize()) {
-        // Saves student and display information
-        // student_ID = parseInt(student_ID_form.value());
-        // display_size = parseInt(display_size_form.value());
+    if (validID() && validSize()) {
+      // Saves student and display information
+      student_ID = parseInt(student_ID_form.value());
+      display_size = parseInt(display_size_form.value());
 
-        // Deletes UI elements
-        // main_text.remove();
-        // student_ID_form.remove();
-        // student_ID_label.remove();
-        // display_size_form.remove();
-        // display_size_label.remove();
+      // Deletes UI elements
+      main_text.remove();
+      student_ID_form.remove();
+      student_ID_label.remove();
+      display_size_form.remove();
+      display_size_label.remove();
         
-        start_button.remove();  
+      start_button.remove();  
         
-        // Goes fullscreen and starts test
-        fullscreen(!fullscreen());
-        testStartTime = millis();
-    // }
+      // Goes fullscreen and starts test
+      fullscreen(!fullscreen());
+      testStartTime = millis();
+    }
 }
 
 
