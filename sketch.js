@@ -576,6 +576,7 @@ function mousePressed() {
       }
 
     }
+    else if (current_trial === 1) testStartTime = millis();
   }
 }
 
@@ -716,7 +717,7 @@ function drawInputArea() {
   fill(input_area_background);
   stroke(input_area_outline);
   strokeWeight(2);
-  rect(inputArea.x, inputArea.y, inputArea.w * 0.95, inputArea.h * 0.95, 20);
+  rect(inputArea.x, inputArea.y, inputArea.w, inputArea.h, 20);
 
   for (let i = 0; i < 18; i++) {
     drawTargetInsideInputArea(i);
