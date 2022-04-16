@@ -36,31 +36,31 @@ let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there i
 
 // Sidebar parameters (new feature)
 let bartime = 0;
-let timePerTarget = 1;
+let timePerTarget = 0.563;
 let decreasePerFrame = 50 / (6 * timePerTarget);
 let firstTurn = true;
 
 
 // Color variables
-
-// color of the background
-let background_color = [33, 158, 188];
+// 33, 158, 188
+// 0, 180, 216
+let background_color = [13, 13, 215];
 
 // main target colors (target to hit)
-let mainTarget_color = [215, 31, 46];
+// 215, 31, 46
+let mainTarget_color = [255, 23, 42];
 let mainTarget_outline = [241, 250, 238];
-let mainTarget_hover = [215, 31, 46];
+let mainTarget_hover = [229, 22, 39];
 
 // colors of the next target to hit
-let nextTarget_color = [234, 84, 96];
 let nextTarget_outline = [241, 250, 238];
-let nextTarget_background = [221, 161, 94];
+let nextTarget_background = [247, 178, 103];
 
 // color of the line to the next target
 let lineToTarget_color = [241, 250, 238];
 
 // colors of the remaining targets
-let genericTarget_color = [52, 52, 52];
+let genericTarget_color = [67, 80, 118];
 
 // colors of the cursor
 let cursor_color = [255, 159, 28];
@@ -68,10 +68,10 @@ let cursor_outline = [0, 0, 0];
 
 // sidebar colors
 let sidebar_background = [30, 30, 30];
-let sidebar_bar = [188, 108, 37];
+let sidebar_bar = [248, 150, 30];
 
-let hit_color = [153, 183, 24];
-let miss_color = [213, 10, 27];
+let input_area_background = [52, 52, 52];
+let input_area_outline = [241, 250, 238];
 
 let aimlock_color = [241, 250, 238];
 
@@ -93,6 +93,18 @@ class Target {
   }
 }
 
+
+// cursor class (position only)
+class Cursor {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+
+// real cursor used to "snap" onto targets
+let realCursor = new Cursor(0,0);
 
 
 // Runs once at the start
@@ -116,7 +128,7 @@ function setup() {
  */
 function draw_line(curr, next) {
   stroke(lineToTarget_color);
-  strokeWeight(4);
+  strokeWeight(default_strokeWeight);
   line(curr.x, curr.y, next.x, next.y);
 }
 
@@ -152,7 +164,7 @@ function draw_mainTarget(target) {
   // Highlights the target the user should be trying to select
   fill(mainTarget_color); // target's color
   stroke(mainTarget_outline); // color of the target's outline
-  strokeWeight(4); // width of the outline
+  strokeWeight(default_strokeWeight); // width of the outline
 
   // Draws the targets
   circle(target.x, target.y, target.w);
@@ -168,11 +180,11 @@ function draw_mainTarget(target) {
  * @param {*} target 
  * @param {*} nextTarget 
  */
-function draw_nexTarget(prevTarget, target, nextTarget) {
+function draw_nexTarget(target, nextTarget) {
 
   // creates a highlight on the next target
   stroke(nextTarget_outline); // color of the target's outline
-  strokeWeight(4); // width of the outline
+  strokeWeight(default_strokeWeight); // width of the outline
 
   // if the next target is the same we're currently on
   if (target.isEqual(nextTarget)) {
@@ -180,21 +192,6 @@ function draw_nexTarget(prevTarget, target, nextTarget) {
     
     drawingContext.setLineDash([15, 15]);
     circle(nextTarget.x, nextTarget.y, nextTarget.w + 30);
-    drawingContext.setLineDash([0, 0]);
-  }
-  // if the target to hit is the same for three iterations
-  // TODO: fix please it brokey when 3 targets.
-  else if (prevTarget.isEqual(nextTarget)) {
-    fill(color(background_color));
-    
-    drawingContext.setLineDash([15, 15]);
-    circle(nextTarget.x, nextTarget.y, nextTarget.w + 30);
-    drawingContext.setLineDash([0, 0]);
-
-    fill(color(background_color));
-    
-    drawingContext.setLineDash([15, 15]);
-    circle(nextTarget.x, nextTarget.y, nextTarget.w + 60);
     drawingContext.setLineDash([0, 0]);
   }
   else {
@@ -225,20 +222,6 @@ function draw_sidebar() {
 }
 
 
-// draws the hit animations
-function hit_animation(x, y) {
-  fill(hit_color);
-  text("Hit", x, y);
-}
-
-
-// draws the miss animations
-function miss_animation(target) {
-  fill(miss_color);
-  text("Miss", x, y);
-}
-
-
 /**
  * **New:**
  * Draws a square box sorrounding the target.
@@ -251,6 +234,65 @@ function draw_area_around_target(target) {
   noFill();
   // draws a square around the target
   square(target.x - TARGET_SIZE, target.y - TARGET_SIZE, target.w * 2);
+}
+
+
+function draw_user_instructions() {
+  // starts drawing the instructions above the user input area
+  let Yspacing = TARGET_SIZE * 2;
+  let instructionsY = inputArea.y - TARGET_SIZE*1.5;
+  let instructionsX = inputArea.x + TARGET_SIZE;
+
+  let textX = instructionsX + TARGET_SIZE;
+
+  // draws the main target
+  fill(mainTarget_color); 
+  stroke(mainTarget_outline); 
+  strokeWeight(default_strokeWeight);
+
+  circle(instructionsX, instructionsY, TARGET_SIZE);
+
+  fill(mainTarget_outline);
+  strokeWeight(1);
+  text('Target to hit', textX, instructionsY);
+  instructionsY -= Yspacing;
+
+  //draws the next target
+  fill(nextTarget_background);
+  stroke(nextTarget_outline);
+  strokeWeight(default_strokeWeight);
+
+  drawingContext.setLineDash([15, 15]);
+  circle(instructionsX, instructionsY, TARGET_SIZE);
+  drawingContext.setLineDash([0, 0]);
+
+  fill(mainTarget_outline);
+  strokeWeight(1);
+  text('Next target to hit', textX, instructionsY);
+  instructionsY -= Yspacing;
+
+  instructionsY = inputArea.y - TARGET_SIZE*1.5;
+  instructionsX = inputArea.x + TARGET_SIZE*5;
+  textX = instructionsX + TARGET_SIZE;
+
+  // draws the double target
+  fill(color(background_color));
+  stroke(nextTarget_outline);
+  strokeWeight(default_strokeWeight);
+
+  drawingContext.setLineDash([15, 15]);
+  circle(instructionsX, instructionsY, TARGET_SIZE + 30);
+  drawingContext.setLineDash([0, 0]);
+
+  fill(mainTarget_color); 
+  stroke(mainTarget_outline); 
+  strokeWeight(default_strokeWeight);
+
+  circle(instructionsX, instructionsY, TARGET_SIZE);
+
+  fill(mainTarget_outline);
+  strokeWeight(1);
+  text('Hit twice', textX, instructionsY);
 }
 
 
@@ -271,6 +313,9 @@ function aimlock_target(x, y) {
     target = getTargetBounds(i);
 
     if (inside_target_area(target, x, y)) {
+      // "snaps" the real cursor onto the target
+      realCursor.x = target.x;
+      realCursor.y = target.y;
       break;
     }
 
@@ -325,10 +370,17 @@ function draw() {
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
     
-    hovering_target(target, x, y);
+    // as long as the virtual cursor isn't inside any of the targets'
+    // areas, the real and virtual cursor are the same
+    realCursor.x = x;
+    realCursor.y = y;
 
     aimlock_target(x, y);
 
+    hovering_target(target, x, y);
+
+    draw_user_instructions();
+    
     strokeWeight(4);
     // cursor color
     fill(cursor_color);
@@ -345,7 +397,7 @@ function draw() {
 function print_fitts_IDS() {
 
   for (let i = 0; i < trials.length; ++i) {
-    let text_X = i / trials.length < 0.5 ? (2 * width) / 6 : (4 * width) / 6;
+    let text_X = i < trials.length / 2 ? width / 3 : (2 * width) / 3;
     let text_Y = 280 + 20 * (i % (trials.length / 2));
 
     let value;
@@ -357,10 +409,10 @@ function print_fitts_IDS() {
       value = 'MISSED';
     }
     else {
-      value = fitts_IDs[i].toFixed(3);
+      value = fitts_IDs[i];
     }
 
-    text("Target " + (i+1) + ": " + value, text_X, text_Y);
+    text("Target " + (i+1) + ": " + str(value), text_X, text_Y);
   }
 }
 
@@ -454,17 +506,19 @@ function inside_target_area(target, x, y) {
  * Uses Fitts' law to calculate the FITTS performance IDs.
  * ---
  * @param {*} target The target that got hit
- * @param {*} x The x coord of our virtual mouse
- * @param {*} y The y coord of out virtual mouse
  * ---
  * @returns Fitts' performance ID.
  */
-function get_fitts_performanceID(target, x, y) {
-  let distance = dist(x, y, target.x, target.y);
+function get_fitts_performanceID(current_trial) {
+
+  let prevTarget = getTargetBounds(trials[current_trial-1]);
+  let target = getTargetBounds(trials[current_trial]);
+
+  let distance = dist(prevTarget.x, prevTarget.y, target.x, target.y);
 
   fid = Math.log(distance/target.w + 1) / Math.log(2)
 
-  return fid;
+  return fid.toFixed(3);
 }
 
 
@@ -476,28 +530,23 @@ function mousePressed() {
   if (draw_targets) {
     // Get the location and size of the target the user should be trying to select
     let target = getTargetBounds(trials[current_trial]);
-    let nextTarget = getTargetBounds(trials[current_trial+1]);
 
     // Check to see if the virtual cursor is inside the target bounds,
     // increasing either the 'hits' or 'misses' counters
     if (insideInputArea(mouseX, mouseY)) {
 
-      let virtual_x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
-      let virtual_y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
+      let virtual_x = realCursor.x;
+      let virtual_y = realCursor.y;
 
       circle(target.x, target.y, target.w);
       
-      // inside target circle: dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2
-      if (inside_target_area(target, virtual_x, virtual_y)) {
+      if (dist(target.x, target.y, virtual_x, virtual_y) < target.w/2) {
         hits++;
         // when the user hits the target, the sidebar resets
         bartime = 0;
         firstTurn = false;
 
-        // TODO: pls fix idk why it brokey bruhhhh
-        // if (current_trial != 0) {
-        //   fitts_IDs.push(get_fitts_performanceID(target, x, y));
-        // }
+        fitts_IDs.push(get_fitts_performanceID(current_trial));
       }
       else {
         misses++;
@@ -537,7 +586,6 @@ function drawTarget(i) {
 
   let target = getTargetBounds(i);
   let nextTarget = getTargetBounds(trials[current_trial+1]);
-  let prevTarget = getTargetBounds(trials[current_trial-1]);
 
   // Does not draw a border if this is not the target the user should be trying to select
   noStroke();
@@ -551,7 +599,7 @@ function drawTarget(i) {
   // Check whether this target is the target the user should be trying to select
   if (trials[current_trial] === i) {
     // draws the next target to hit
-    draw_nexTarget(prevTarget, target, nextTarget);
+    draw_nexTarget(target, nextTarget);
     
     // draws the current target
     draw_mainTarget(target);
@@ -628,10 +676,49 @@ function windowResized() {
 }
 
 
+/**
+ * **New:**
+ * Draws a the targets to hit on the user input area.
+ * ---
+ * @param {*} i The target index
+ */
+function drawTargetInsideInputArea(i){
+  target = getTargetBounds(i);
+
+  x = map(target.x, 0, width, inputArea.x, inputArea.x + inputArea.w);
+  y = map(target.y, 0, height, inputArea.y, inputArea.y + inputArea.h);
+
+  size = target.w * (inputArea.w / height);
+  
+  noStroke();
+  fill(genericTarget_color);
+
+  if (trials[current_trial] === i) {
+    fill(color(mainTarget_color));
+
+    if (trials[current_trial + 1] === i) {
+      strokeWeight(default_strokeWeight);
+      stroke(color(mainTarget_outline));
+    }
+  }
+  else if (trials[current_trial + 1] === i) {
+    fill(color(nextTarget_background));
+  }
+
+  rectMode(CENTER);
+  rect(x, y, size, size);
+  rectMode(CORNER);
+}
+
+
 // Responsible for drawing the input area
 function drawInputArea() {
-  fill(color(20, 100, 20));
-  stroke(color(0, 220, 220));
+  fill(input_area_background);
+  stroke(input_area_outline);
   strokeWeight(2);
   rect(inputArea.x, inputArea.y, inputArea.w * 0.95, inputArea.h * 0.95, 20);
+
+  for (let i = 0; i < 18; i++) {
+    drawTargetInsideInputArea(i);
+  }
 }
