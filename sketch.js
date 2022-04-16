@@ -44,7 +44,7 @@ let firstTurn = true;
 // Color variables
 // 33, 158, 188
 // 0, 180, 216
-let background_color = [13, 13, 215];
+let background_color = [1, 57, 147];
 
 // main target colors (target to hit)
 // 215, 31, 46
@@ -54,13 +54,13 @@ let mainTarget_hover = [229, 22, 39];
 
 // colors of the next target to hit
 let nextTarget_outline = [241, 250, 238];
-let nextTarget_background = [247, 178, 103];
+let nextTarget_background = [217, 162, 74];
 
 // color of the line to the next target
 let lineToTarget_color = [241, 250, 238];
 
 // colors of the remaining targets
-let genericTarget_color = [67, 80, 118];
+let genericTarget_color = [77, 87, 99];
 
 // colors of the cursor
 let cursor_color = [255, 159, 28];
