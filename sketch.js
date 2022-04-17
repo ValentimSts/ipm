@@ -253,7 +253,8 @@ function draw_user_instructions() {
   circle(instructionsX, instructionsY, TARGET_SIZE);
 
   fill(mainTarget_outline);
-  strokeWeight(1);
+  strokeWeight(0);
+  textSize(20);
   text('Target to hit', textX, instructionsY);
   instructionsY -= Yspacing;
 
@@ -267,9 +268,14 @@ function draw_user_instructions() {
   drawingContext.setLineDash([0, 0]);
 
   fill(mainTarget_outline);
-  strokeWeight(1);
+  strokeWeight(0);
+  textSize(20);
   text('Next target to hit', textX, instructionsY);
   instructionsY -= Yspacing;
+
+  strokeWeight(0);
+  textSize(30);
+  text('Red background means you missed the target', textX - 130, instructionsY + 50);
 
   instructionsY = inputArea.y - TARGET_SIZE*1.5;
   instructionsX = inputArea.x + TARGET_SIZE*5;
@@ -291,7 +297,8 @@ function draw_user_instructions() {
   circle(instructionsX, instructionsY, TARGET_SIZE);
 
   fill(mainTarget_outline);
-  strokeWeight(1);
+  strokeWeight(0);
+  textSize(20);
   text('Hit twice', textX, instructionsY);
 }
 
