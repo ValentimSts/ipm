@@ -42,8 +42,10 @@ let firstTurn = true;
 
 
 // Color variables
+let hit_background_color = [38, 70, 83];
+let miss__background_color = [94, 28, 28];
 
-let background_color = [38, 70, 83];
+let background_color = hit_background_color;
 
 // main target colors (target to hit)
 let mainTarget_color = [255, 23, 42];
@@ -545,11 +547,15 @@ function mousePressed() {
         firstTurn = false;
 
         fitts_IDs.push(get_fitts_performanceID(current_trial));
+        // updates the background color as the user hit the right target
+        background_color = hit_background_color;
       }
       else {
         misses++;
         firstTurn = false;
         fitts_IDs.push(-1);
+        // updates the background color as the user hit the wrong target
+        background_color = miss__background_color;
       }
 
       current_trial++; // Move on to the next trial/target
