@@ -7,7 +7,7 @@
 
 
 // Database (CHANGE THESE!)
-const GROUP_NUMBER = 0; // Add your group number here as an integer (e.g., 2, 3)
+const GROUP_NUMBER = 6; // Add your group number here as an integer (e.g., 2, 3)
 const BAKE_OFF_DAY = false; // Set to 'true' before sharing during the bake-off day
 
 
@@ -42,19 +42,17 @@ let firstTurn = true;
 
 
 // Color variables
-// 33, 158, 188
-// 0, 180, 216
-let background_color = [1, 57, 147];
+
+let background_color = [38, 70, 83];
 
 // main target colors (target to hit)
-// 215, 31, 46
 let mainTarget_color = [255, 23, 42];
 let mainTarget_outline = [241, 250, 238];
 let mainTarget_hover = [229, 22, 39];
 
 // colors of the next target to hit
 let nextTarget_outline = [241, 250, 238];
-let nextTarget_background = [217, 162, 74];
+let nextTarget_background = [70, 116, 111];
 
 // color of the line to the next target
 let lineToTarget_color = [241, 250, 238];
@@ -68,7 +66,7 @@ let cursor_outline = [0, 0, 0];
 
 // sidebar colors
 let sidebar_background = [30, 30, 30];
-let sidebar_bar = [248, 150, 30];
+let sidebar_bar = [251, 133, 0];
 
 let input_area_background = [52, 52, 52];
 let input_area_outline = [241, 250, 238];
@@ -214,11 +212,11 @@ function draw_sidebar() {
 
   // sidebar background color
   fill(sidebar_background);
-  rect(110, 190, 40, 500, 20);
+  rect(110, 280, 40, 500, 20);
 
   // sidebar "sliding bar" color
   fill(sidebar_bar);
-  rect(110, 190, 40, 500 - bartime, 20);
+  rect(110, 280, 40, 500 - bartime, 20);
 }
 
 
@@ -576,7 +574,9 @@ function mousePressed() {
       }
 
     }
-    else if (current_trial === 1) testStartTime = millis();
+    else if (current_trial === 1) {
+      testStartTime = millis();
+    }
   }
 }
 
